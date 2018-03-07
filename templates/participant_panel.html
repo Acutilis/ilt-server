@@ -1,0 +1,10 @@
+<div id="control_panel" class="participant">
+    <h4>Participant Control Panel</h4>
+    <input id="navigation_locked" type="checkbox" disabled="disabled" {% if navigation_locked %}checked{% end %}>Navigation Locked</input>
+    <button id="sync_to_instructor" {% if navigation_locked %}disabled{% end %}>Sync to Instructor</button>
+</div>
+<script>
+$('#sync_to_instructor').on('click', function(ev) {
+    ILTRevealSession.sendreq_sync_to_instructor();
+});
+</script>

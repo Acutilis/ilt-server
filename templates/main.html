@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ILT Presentation System</title>
+    <script src="/static/zepto.min.js"></script>
+    <script src="/static/underscore-min.js"></script>
+    <script src="/static/iltrevealsession.js"></script>
+     <link href="/static/style.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+
+<div id="control_panel"></div>
+<div id="main_content">
+    <h1>ILT Presentation System</h1>
+    <h2>Join Presentation</h2>
+    <p>To join the presentation you need to choose a nickname.</p>
+
+    <div id="nickbox">
+        <p>Your preferred nickname: <input id="txtNickname" type="text" name="Nickname" value=""></p>
+        <p><input id="btnJoin" type="button" name="Send" value="Join!" disabled="disabled"/></p>
+    </div>
+</div>
+
+<script>
+  Zepto(function($){
+    if (! ILTRevealSession.ws_support()) {
+        $('#main_content').replaceWith('<h1>Sorry</h1><p>Sorry, your browser does not support WebSockets. This functionality is necessary to use this system. Please use another browser.</p>');
+        return null;
+    } else {
+      // setup things for that nick box so the user can type a nick and join the presentation
+      function update_send() {
+          if (  $("#txtNickname").val() != "") {
+            $("#btnJoin").removeAttr("disabled");
+          } else {
+            $("#btnJoin").attr("disabled", "disabled");
+         }
+      };
+      $("#txtNickname").keyup(function(event) { update_send(); } );
+
+      $('#btnJoin').click(function() {
+          // here get the nick, and open the ws connection, passing the nick
+          ILTRevealSession.init_ws($("#txtNickname").val());
+      });
+    }
+  });
+
+
+</script>
+
+</body>
+</html>
