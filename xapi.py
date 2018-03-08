@@ -40,10 +40,17 @@ class XAPI(object):
         with open('lrs_config.json', 'r') as fi:
             llist = json.load(fi)
         for lrsconf in llist:
-            obj = { 'name': lrsconf['name'], 'online': True }
+            obj = { 'name': lrsconf['name'], 'online': True}
+            if 'active' in lrsconf:
+                obj['active'] = lrsconf['active']
+                del(lrsconf['active'])
+            else:
+                obj['active'] = True
             del(lrsconf['name'])
             lrs = RemoteLRS(**lrsconf)
-            self._LRSs.append(lrs)
+            obj['lrs'] = lrs
+            #self._LRSs.append(lrs)
+            self._LRSs.append(obj)
         # TODO: check that lrs setup is right, loop through LRSs to make sure they're online
 
     def _set_session_object(self):
@@ -77,9 +84,12 @@ class XAPI(object):
         self._presentation_object = object
 
     def _send_to_LRS(self, statement):
+        if not self._LRSs[0]['active']:
+            print 'NOT SENDING STATEMENT...'
+            return
         statement = self._enhance_statement(statement)
         # For now, use only the 1st LRS in our list of LRSs. It is considered "the main one".
-        response = self._LRSs[0].save_statement(statement)
+        response = self._LRSs[0]['lrs'].save_statement(statement)
         if not response or not response.success:
             app_log.info('ERROR Saving statement to LRS...')
             app_log.info(response.data)

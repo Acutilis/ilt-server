@@ -2,6 +2,7 @@
 [
 
 {
+    "active": false,
     "name": "PabLLv2Container",
     "endpoint": "http://llv2.lrs.com/data/xAPI/",
     "version": "1.0.1",
