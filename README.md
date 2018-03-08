@@ -35,6 +35,7 @@ To test, open up at least two browser windows, and go to `localhost:8888`. Enter
 ## xAPI
 
 The `lrs_config.json` file contains information for the LRSs. Please note that it's an array. It has only one object (one LRS). You can put more objects in the array, but they will be ignored (the idea was to implement multiple LRS functionality but, probably we won't do it for now).
+The config object for an LRS admits the attribute `active`, which can be set to `true` or `false`. When it is `false`, the statements will not be sent to the LRS. Useful during development.
 
 ### Statements
 Here are the statements, expressed in plain language, that the system sends:
@@ -56,4 +57,7 @@ The choice of verbs is not set in stone. I needed to choose something so I could
 
 Also, the choice of custom IRIs could change. If this project -or the interest it generates- ever moves beyond the prototype/proof of concept phase, the right thing to do would be to develop a Community of Practice around ILT-xAPI, and come up with a profile. As part of that effort, verbs, activity types, extensions, etc. would have to be chosen much more carefully.
 
+## Monitor
 
+The route `localhost:8888/monitor` shows a page with information about the session. This information is updated in real time, so no need to refresh the page or anything.
+Right now it only shows the number of participants and the number of statements generated (even if they are not sent to the LRS). Very little info, but the basic mechanics are implemented in the code, and it's pretty easy to add more parameters to be monitored and/or implement better visualizations on the client side of the monitor.

@@ -44,6 +44,37 @@ class MainHandler(tornado.web.RequestHandler):
     def get(self):
         self.render("templates/main.html")
 
+class MonitorHandler(tornado.web.RequestHandler):
+    def initialize(self, session_controller):
+        """Store a reference to the "external" SessionController instance"""
+        self._SC = session_controller
+
+    def get(self):
+        self.render("templates/monitor.html")
+
+
+class MonitorWSConnection(websocket.WebSocketHandler):
+    def initialize(self, session_controller):
+        """Store a reference to the "external" SessionHandler instance"""
+        self._SC = session_controller
+        self._statements = 0
+        self._participants = 0
+
+    def open(self):
+        app_log.info("| MONITOR_CONNECTION_OPENED")
+        self._SC.add_monitor(self)
+
+    def on_close(self):
+        self._SC.remove_monitor(self)
+        app_log.info("| MONITOR_CONNECTION_CLOSED")
+
+    def allow_draft76(self):
+        # I think this was needed for Mac??
+        return True
+
+    def on_message(self, message):
+        # this connection won't receive messages
+        pass
 
 class SessionController(object):
     """Store data about connections, users, etc."""
@@ -59,8 +90,20 @@ class SessionController(object):
         self._lock_student_nav = True
         self._latest_instructor_state = ''
         self._instructor_actor = None
+        # monitors and stats
+        self._monitors = []
+        self.stats = {
+            'participants': 0,
+            'statements': 0
+        }
 
         self._xapi.sendstatement_session_started()
+
+    def __getitem__(self, item):
+        return getattr(self, item)
+
+#     def __setitem__(self, key, item):
+#        self.[key] = item
 
     def get_safe_nick(self, initial_nick):
         """Create a safe nick: one with no spaces, etc. and that doesn't exist already in the session."""
@@ -159,6 +202,27 @@ class SessionController(object):
             if not conn._is_instructor:
                 conn.write_message(msg)
 
+    # monitor and stats methods
+    # todo: the stats 'part' should know what has changed recently..?.
+    def add_monitor(self, conn):
+        self._monitors.append(conn)
+
+    def _update_monitors(self, item_name):
+        msg = '|'.join([item_name, str(self.stats[item_name])])
+        for mon in self._monitors:
+            mon.write_message(msg)
+
+    def inc_stat(self, item_name):
+        self.stats[item_name] += 1
+        self._update_monitors(item_name)
+
+    def dec_stat(self, item_name):
+        self.stats[item_name] -= 1
+        self._update_monitors(item_name)
+
+    def set_stat(self, item_name, item_value):
+        self.stats[item_name] = item_value
+        self._update_monitors(item_name)
 
 
 class ClientWSConnection(websocket.WebSocketHandler):
@@ -197,11 +261,13 @@ class ClientWSConnection(websocket.WebSocketHandler):
         # send the start presentation content to this client only
         if self._SC._presentation_started:
             self._SC.send_start_presentation(self)
+        self._SC.inc_stat('participants')
 
     def on_close(self):
         self._SC._xapi.sendstatement_left_session(self)
         self._SC.remove_client(self._nick)
         app_log.info("| WS_CLOSED | %s" % self._nick)
+        self._SC.dec_stat('participants')
 
     def allow_draft76(self):
         # I think this was needed for Mac??
@@ -308,7 +374,9 @@ if __name__ == "__main__":
     }
     app = tornado.web.Application([
         (r"/", MainHandler, {'session_controller': sc}),
-        (r"/ws", ClientWSConnection, {'session_controller': sc})
+        (r"/ws", ClientWSConnection, {'session_controller': sc}),
+        (r"/monitor", MonitorHandler, {'session_controller': sc}),
+        (r"/monws", MonitorWSConnection, {'session_controller': sc})
         ], **settings)
 
     app.listen(tornado.options.options.port,tornado.options.options.ip)

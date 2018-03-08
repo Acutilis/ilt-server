@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ILT Presentation System</title>
+    <script src="/static/zepto.min.js"></script>
+    <script src="/static/underscore-min.js"></script>
+    <link href="/static/style.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+
+<h1>ILT Presentation System Monitor</h1>
+
+<div class="text-panel">
+    <label for="participants">Participants: </label>
+    <output id="participants">0</output>
+</div>
+
+<div class="text-panel">
+    <label for="statements">Statements: </label>
+    <output id="statements">0</output>
+</div>
+
+
+<script>
+
+var MON =  {
+
+    ws_support: function() {
+        ws = 'WebSocket' in window || 'MozWebSocket' in window;
+        if ( typeof( ws ) == "undefined") { ws = false; }
+        return ws;
+    },
+
+    init_ws: function() {
+        var url;
+        url = "ws://"+window.location.host  + "/monws";
+        ws = new WebSocket( url );
+
+        ws.onopen  = function(event) {
+            console.log("Socket opened");
+
+            window.onbeforeunload = function(e) {
+                ws.close()
+           };
+        }
+
+        ws.onclose = function(){
+            console.log("WebSocket closed.");
+        }
+
+        ws.onerror  = function(event) {
+            console.log("ERROR opening WebSocket.");
+        }
+
+        _.bindAll(this, 'receive_message');
+        ws.onmessage = this.receive_message;
+    },
+
+    send_msg: function(msg) {
+        ws.send(msg);
+    },
+
+    receive_message: function(wsevent) {
+        console.log("received message: "+wsevent.data );
+        // the messages on this connection have the form <item_name>|<item_value>
+        var msg_parts = wsevent.data.split('|')  // the messages in this connection have only 2 parts: item_name and value.
+        var item_name = msg_parts[0]
+        var item_value = msg_parts[1]
+        $('#'+item_name).html(item_value);
+     },
+}
+
+if (! MON.ws_support()) {
+    alert('Your browser does not support WebSockets. Please use another browser.');
+} else {
+    MON.init_ws();
+}
+
+</script>
+
+</body>
+</html>

@@ -84,6 +84,8 @@ class XAPI(object):
         self._presentation_object = object
 
     def _send_to_LRS(self, statement):
+        # the stat should only be updated for real sending...
+        self._SC.inc_stat('statements')
         if not self._LRSs[0]['active']:
             print 'NOT SENDING STATEMENT...'
             return
