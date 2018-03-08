@@ -99,12 +99,6 @@ class SessionController(object):
 
         self._xapi.sendstatement_session_started()
 
-    def __getitem__(self, item):
-        return getattr(self, item)
-
-#     def __setitem__(self, key, item):
-#        self.[key] = item
-
     def get_safe_nick(self, initial_nick):
         """Create a safe nick: one with no spaces, etc. and that doesn't exist already in the session."""
         safe_nick = re.sub(r"[^\w\s]", '', initial_nick)   
@@ -206,6 +200,9 @@ class SessionController(object):
     # todo: the stats 'part' should know what has changed recently..?.
     def add_monitor(self, conn):
         self._monitors.append(conn)
+
+    def remove_monitor(self, conn):
+        self._monitors.remove(conn)
 
     def _update_monitors(self, item_name):
         msg = '|'.join([item_name, str(self.stats[item_name])])
