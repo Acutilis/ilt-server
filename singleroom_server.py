@@ -142,7 +142,8 @@ class SessionController(object):
         return self._latest_instructor_state 
 
     def generate_start_presentation_msg(self):
-        params_obj = { 'source': '/static/presentations/pres1/index.html',
+        #params_obj = { 'source': '/static/presentations/pres1/index.html',
+        params_obj = { 'source': '/static/presentations/teamPresentation1/index.html',
                         'follow_instructor': self._follow_instructor,
                         'lock_student_nav': self._lock_student_nav
         }

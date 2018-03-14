@@ -1,0 +1,140 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<title>reveal.js</title>
+
+		<link rel="stylesheet" href="css/reveal.css">
+		<link rel="stylesheet" href="css/theme/moon.css">
+
+		<!-- Theme used for syntax highlighting of code -->
+		<link rel="stylesheet" href="lib/css/zenburn.css">
+
+		<!-- Printing and PDF exports -->
+		<script>
+			var link = document.createElement( 'link' );
+			link.rel = 'stylesheet';
+			link.type = 'text/css';
+			link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+			document.getElementsByTagName( 'head' )[0].appendChild( link );
+		</script>
+	</head>
+	<body>
+		<div class="reveal">
+			<div class="slides">
+
+				<!-- Slide "Zero" -->
+				<section title="presentation_title"> 
+							<h2>Data from Instructor Led Training</h2>
+				</section>
+
+				<!-- Slide One -->
+				<section id="main-menu" title="main_menu">
+							<h3>Data from Instructor Led Training</h3>
+							<table>
+								<tbody>
+									<tr>
+										<td><a href="#/ilt-slide">ILT</a></td>
+										<td><a href="#/data-slide">Data</a></td>
+										<td><a href="#/stakeholders-slide">Stakeholders</a></td>
+									</tr>
+									<tr>
+										<td><a href="#/importance-slide">Importance of Data</a></td>
+										<td><a href="#/opportunities-slide">Opportunities to Capture Data</a></td>
+										<td><a href="#/future-slide">Future Possibilities with xAPI</a></td>
+									</tr>
+								</tbody>
+							</table>
+					</section>
+
+					<section id="ilt-slide" title="instructor_led_training">
+							<h3> Instructor Led Training (ILT)</h3>
+							<p>Instructor led training is facilitated by an instructor either virtually or in a classroom setting. Instructor-led training allows the audience and instructors or facilitators to interact and discuss the training material, in a synchronous or asynchronous manner.</p>
+							<a href="#/main-menu">Return to Menu</a>
+					</section>
+
+					<section id="data-slide" title="data_requested_from_ilt">
+								<h3>Data</h3>
+								<p>Types of Data requested from ILT:</p>
+										<ul>
+												<li>Organization of the course.</li>
+												<li>Effectiveness of the course and content.</li>
+												<li>Behavior/Performance changes.</li>
+												<li>Assessment scores.</li>
+												<li>Is further training required?</li>
+										</ul>
+								<p> <a href="#/main-menu">Return to Menu</a> </p>
+					</section>
+
+					<section id="importance-slide" title="importance_of_data">
+								<h3>Importance of Data</h3>
+								<p>Data primarily enables us to judge the effectiveness of the course, however in the long run informs if any further training is required. We may seek answers to some simple questions like:</p>
+										<ul>
+												<li>Ease of Navigation</li>
+												<li>Clarity of instructions</li>
+												<li>Too much text per slide</li>
+												<li>Consistency of the interactions</li>
+												<li>Presentation of the content</li>
+												<li>Were the assessments or quizzes appropriate?</li>
+												<li>Did the media distract or contribute to the effectiveness of the content?</li>
+										</ul>
+								<p> <a href="#/1">Return to Menu</a> </p>
+					</section>
+
+					<section id="stakeholders-slide" title="stakeholders_data_from_ILT">
+								<h3>Stakeholders</h3>
+								<p>Who might be interested in data from ILT?</p>
+										<ul>
+												<li>Business/Operations</li>
+												<li>Instructors/Facilitators</li>
+												<li>Audience</li>
+												<li>Managers</li>
+												<li>Instructional Designers</li>
+										</ul>
+								<p> <a href="#/main-menu">Return to Menu</a> </p>
+					</section>
+
+					<section id="opportunities-slide" title="opportunities_to_capture_data">
+								<h3>Opportunities to Capture Data</h3>
+								<p>ILT presents multiple opportunities to capture data. From a broader perspective, we can gather data pre, during, and post training.</p>
+										<ul>
+												<li>Quiz/Assessment Results</li>
+												<li>Overall performance scores</li>
+												<li>Individual performance scores</li>
+												<li>Completion rates</li>
+												<li>Performance and progress</li>
+												<li>Surveys</li>
+												<li>Feedback from audience - smile sheets</li>
+										</ul>
+								<p> <a href="#/main-menu">Return to Menu</a> </p>
+					</section>
+
+					<section id="future-slide" title="future_possibilities">
+								<h3>Future Possibilities with xAPI</h3>
+								<p>There are limitless possibilities with xAPI data. You can not only derive the overall results but also what happens along the way during learning. xAPI provides data about learning activities, behavior and performance essentailly giving a 360 degree view of data. You can study learning activity patterns, engagement over time in addition to overall results. </p>
+								<p> <a href="#/main-menu">Return to Menu</a> </p>
+					</section>
+
+			</div>
+		</div>
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.js"></script>
+
+		<script>
+			// More info about config & dependencies:
+			// - https://github.com/hakimel/reveal.js#configuration
+			// - https://github.com/hakimel/reveal.js#dependencies
+			Reveal.initialize({
+				dependencies: [
+					{ src: 'plugin/markdown/marked.js' },
+					{ src: 'plugin/markdown/markdown.js' },
+					{ src: 'plugin/notes/notes.js', async: true },
+					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } }
+				]
+			});
+		</script>
+	</body>
+</html>
