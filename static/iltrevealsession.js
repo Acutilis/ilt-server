@@ -144,9 +144,14 @@ var ILTRevealSession = window.ILTRevealSession || (function(){
              if (locked) {
                 chk_element.attr("checked", locked);
                 btn_element.attr("disabled", true);
+                // disable internal links
+                //var internal_links = $('.slides', this.pres_iframe.get(0).contentWindow.document).find('a')
+                var internal_links = $('.slides', this.pres_iframe.get(0).contentWindow.document).find('a').css('pointer-events', 'none').css('color', '#bed3e2');
+
              } else {
                 chk_element.removeAttr("checked");
                 btn_element.removeAttr("disabled");
+                var internal_links = $('.slides', this.pres_iframe.get(0).contentWindow.document).find('a').css('pointer-events', 'auto').css('color', '#268bd2');
              }
              ILTRevealSession.Reveal.configure({keyboard: !locked, controls: !locked})
          }, 
