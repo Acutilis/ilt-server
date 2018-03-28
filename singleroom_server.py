@@ -7,6 +7,7 @@ import re
 import struct
 import sqlite3
 import signal
+import glob
 
 import tornado.ioloop
 import tornado.web
@@ -35,6 +36,13 @@ def render_file(filename, args=None):
         data = loader.load(filename).generate()
     return data
 
+def get_available_presentations():
+    raw_flist = sorted(glob.glob('./static/presentations/*'))
+    flist = []
+    for fn in raw_flist:
+        flist.append(fn.split('/')[-1])
+    #print(flist)
+    return flist
 
 class MainHandler(tornado.web.RequestHandler):
     def initialize(self, session_controller):
@@ -90,12 +98,17 @@ class SessionController(object):
         self._lock_student_nav = True
         self._latest_instructor_state = ''
         self._instructor_actor = None
+        self._available_presentations = get_available_presentations()
+        self._active_presentation_name = None  # TO-DO: need to keep track for late-coming clients!
+        self._active_presentation_path = None  # TO-DO: need to keep track for late-coming clients!
         # monitors and stats
         self._monitors = []
         self.stats = {
             'participants': 0,
             'statements': 0
         }
+
+
 
         self._xapi.sendstatement_session_started()
 
@@ -141,9 +154,11 @@ class SessionController(object):
     def get_instructor_state(self):
         return self._latest_instructor_state 
 
-    def generate_start_presentation_msg(self):
-        #params_obj = { 'source': '/static/presentations/pres1/index.html',
-        params_obj = { 'source': '/static/presentations/teamPresentation1/index.html',
+    def generate_start_presentation_msg(self, path):
+        self._active_presentation_name = path.split('/')[-2]
+        self._active_presentation_path = path
+        #params_obj = { 'source': '/static/presentations/teamPresentation1/index.html',
+        params_obj = { 'source': path,
                         'follow_instructor': self._follow_instructor,
                         'lock_student_nav': self._lock_student_nav
         }
@@ -163,12 +178,12 @@ class SessionController(object):
         for nick in self.clients:   # remember that the keys in self.clients are the nicks
             self.clients[nick]['connection'].write_message(msg)
 
-    def send_start_presentation(self, connection):
-        msg = self.generate_start_presentation_msg()
+    def send_start_presentation(self, connection, path):
+        msg = self.generate_start_presentation_msg(path)
         connection.write_message(msg)
 
-    def broadcast_start_presentation(self):
-        msg = self.generate_start_presentation_msg()
+    def broadcast_start_presentation(self, path):
+        msg = self.generate_start_presentation_msg(path)
         for nick in self.clients:   # remember that the keys in self.clients are the nicks
             self.clients[nick]['connection'].write_message(msg)
         self._presentation_started = True
@@ -248,7 +263,7 @@ class ClientWSConnection(websocket.WebSocketHandler):
         # unusual thing to do, but very convenient in this app
         if (self._is_instructor):
             self._SC._instructor_actor = self._actor
-            panel_content = render_file("instructor_panel.html")
+            panel_content = render_file("instructor_panel.html", { 'available_presentations': self._SC._available_presentations})
             self.write_message('panel_content|' + panel_content)
         else:
             panel_content = render_file("participant_panel.html", { "navigation_locked": self._SC._lock_student_nav})
@@ -258,7 +273,7 @@ class ClientWSConnection(websocket.WebSocketHandler):
         # if the presentation has started when this connection joins
         # send the start presentation content to this client only
         if self._SC._presentation_started:
-            self._SC.send_start_presentation(self)
+            self._SC.send_start_presentation(self, self._SC._active_presentation_path )
         self._SC.inc_stat('participants')
 
     def on_close(self):
@@ -289,11 +304,12 @@ class ClientWSConnection(websocket.WebSocketHandler):
 
     def handle_start_presentation(self, msg_parts):
         # ignore this command if coming from a normal participant
+        path = msg_parts[1]
         if not self._is_instructor:
             return
-        self._SC.broadcast_start_presentation()
+        self._SC.broadcast_start_presentation(path)
         # future: when multiple presentations are allowed, use the corresponding slug
-        self._SC._xapi.set_presentation_object("first_test_presentation")
+        self._SC._xapi.set_presentation_object(self._SC._active_presentation_name)
         self._SC._xapi.sendstatement_presentation_launched(self)
 
     def handle_slide_changed(self, msg_parts):
@@ -355,6 +371,7 @@ class ClientWSConnection(websocket.WebSocketHandler):
         if not self._is_instructor:
             return;
         self._SC.broadcast_finish_presentation()
+        self._SC._xapi.sendstatement_presentation_unloaded(self)
 
 
 if __name__ == "__main__":

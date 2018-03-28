@@ -163,6 +163,17 @@ class XAPI(object):
         )
         self._send_to_LRS(statement)
 
+    def sendstatement_presentation_unloaded(self, conn):
+        verb = Verb(
+            id='https://iltserver.com/verbs/unloaded',
+            display=LanguageMap({'en-US': 'unloaded'}),
+        )
+        statement = Statement(
+            actor=conn._actor,
+            verb=verb,
+            object=self._presentation_object
+        )
+        self._send_to_LRS(statement)
     # looking at http://xapi.vocab.pub/verbs/index.html
 
     def sendstatement_joined_session(self, conn):

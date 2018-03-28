@@ -162,9 +162,9 @@ var ILTRevealSession = window.ILTRevealSession || (function(){
 
         /* Functions to send requests to the server. They all start with 'sendreq_' */
 
-         sendreq_start_presentation: function () {
+         sendreq_start_presentation: function (path) {
             // instructor-only function
-            this.send_msg('start_presentation|')
+            this.send_msg('start_presentation|' + path)
          },
 
          sendreq_lock_student_nav: function(checked){
