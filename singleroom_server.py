@@ -24,6 +24,7 @@ from xapi import XAPI
 
 def stop_handler(signum, frame):
     sc._xapi.sendstatement_session_ended()
+    sc._xapi.flush_buffer()
     app_log.info('Stopping server...')
     tornado.ioloop.IOLoop.instance().stop()
     app_log.info('Server stopped. Exiting.')

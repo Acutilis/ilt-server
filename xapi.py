@@ -28,6 +28,8 @@ class XAPI(object):
         self._SC = session_controller
         self._LRSs = []
         self._statement_buffer = []
+        self._buffer_size = 10
+        self._buffer_discard_size = 500
         self._session_activity_id = None
         self._presentation_activity_id = None
         self._session_object = None
@@ -87,17 +89,34 @@ class XAPI(object):
         # the stat should only be updated for real sending...
         self._SC.inc_stat('statements')
         if not self._LRSs[0]['active']:
-            print 'NOT SENDING STATEMENT...'
+            app_log.info('Not Sending Statement...')
             return
         statement = self._enhance_statement(statement)
-        # For now, use only the 1st LRS in our list of LRSs. It is considered "the main one".
-        response = self._LRSs[0]['lrs'].save_statement(statement)
+        # save to buffer
+        self._statement_buffer.append(statement)
+        if len(self._statement_buffer) >= self._buffer_size:
+            # For now, use only the 1st LRS in our list of LRSs. It is considered "the main one".
+            #response = self._LRSs[0]['lrs'].save_statement(statement)
+            self.flush_buffer()
+        else:
+            app_log.info('Statement buffered: '+ statement.actor.mbox + ' ' + statement.verb.id + ' ' + statement.object.id)
+
+    def flush_buffer(self):
+        if len(self._statement_buffer) == 0:
+            return
+        response = self._LRSs[0]['lrs'].save_statements(self._statement_buffer)
         if not response or not response.success:
             app_log.info('ERROR Saving statement to LRS...')
             app_log.info(response.data)
             # send to monitor statement errors
+            # keep statements in the buffer... unless it reaches the discard size...
+            bl = len(self._statement_buffer) 
+            if (bl >= self._buffer_discard_size):
+                self._statement_buffer=[]
+                app_log.info('ATTENTION: ' + str(bl) + 'statements in buffer have been discarded!')
         else:
-            app_log.info('Statement saved to LRS: '+ statement.actor.mbox + ' ' + statement.verb.id + ' ' + statement.object.id)
+            self._statement_buffer = []
+            app_log.info('Buffered statements saved to LRS.')
             # increment statement sent count and send to monitors
 
     def _enhance_statement(self, statement):
@@ -114,6 +133,7 @@ class XAPI(object):
         #   slide indices
         #   progress?
         return statement
+
 
     # send statement methods
 
