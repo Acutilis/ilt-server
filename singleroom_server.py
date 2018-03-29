@@ -399,5 +399,7 @@ if __name__ == "__main__":
     app_log.info('Presentation System Server started.')
     signal.signal(signal.SIGINT, stop_handler)
     app_log.info('listening on %s:%s...' % (tornado.options.options.ip,tornado.options.options.port))
+    pc = tornado.ioloop.PeriodicCallback(sc._xapi.flush_buffer, 10000)  # every 10 seconds
+    pc.start()
     tornado.ioloop.IOLoop.instance().start()
 

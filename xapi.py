@@ -28,7 +28,8 @@ class XAPI(object):
         self._SC = session_controller
         self._LRSs = []
         self._statement_buffer = []
-        self._buffer_size = 10
+        # Use fixed size buffer. It wouldn't be hard to adjust the size dynamically depending on the number of clients
+        self._buffer_size = 25
         self._buffer_discard_size = 500
         self._session_activity_id = None
         self._presentation_activity_id = None
