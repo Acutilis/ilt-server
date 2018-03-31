@@ -1,0 +1,38 @@
+<div id="control_panel" class="instructor">
+    <h4>Instructor Control Panel</h4>
+    <select id="available_pres"> <!--Supplement an id here instead of using 'text'-->
+        {% for ap in available_presentations %}
+        <option value="/static/presentations/{{ ap }}/index.html">{{ ap }}</option> 
+        {% end %}
+    </select>
+    <button id="start_presentation">Start Presentation</button>
+    <input id="lock_student_nav" type="checkbox" checked>Lock Student Navigation</input>
+    <input id="lock_follow_instructor" type="checkbox" checked>Lock Follow Me</input>
+    <button id="sync_to_me">Sync All with Me</button>
+    <button id="finish_presentation" disabled>Finish Presentation</button>
+</div>
+<script>
+$('#start_presentation').on('click', function(ev) {
+    ev.target.setAttribute("disabled","true");
+    $('#finish_presentation').removeAttr("disabled");
+    var path = $("#available_pres").val();
+    ILTRevealSession.sendreq_start_presentation(path);
+});
+$('#lock_student_nav').on('click', function(ev) {
+    ILTRevealSession.sendreq_lock_student_nav(ev.target.checked);
+});
+$('#lock_follow_instructor').on('click', function(ev) {
+    ILTRevealSession.sendreq_lock_follow_instructor(ev.target.checked);
+});
+$('#sync_to_me').on('click', function(ev) {
+    ILTRevealSession.sendreq_sync_to_instructor();
+});
+$('#finish_presentation').on('click', function(ev) {
+    if (!window.confirm("Do you really want to finish the presentation?")) { 
+        return;
+    }
+    ev.target.setAttribute("disabled", "true");
+    $('#start_presentation').removeAttr("disabled");
+    ILTRevealSession.sendreq_finish_presentation();
+});
+</script>

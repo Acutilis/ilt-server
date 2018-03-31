@@ -1,0 +1,156 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+        <title>reveal.js</title>
+
+        <link rel="stylesheet" href="css/reveal.css">
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.6.2/css/bulma.min.css" rel="stylesheet" type="text/css">
+        <link rel="stylesheet" href="css/theme/moon.css">
+
+        <!-- Theme used for syntax highlighting of code -->
+        <link rel="stylesheet" href="lib/css/zenburn.css">
+
+        <!-- Printing and PDF exports -->
+        <script>
+            var link = document.createElement( 'link' );
+            link.rel = 'stylesheet';
+            link.type = 'text/css';
+            link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+            document.getElementsByTagName( 'head' )[0].appendChild( link );
+        </script>
+    </head>
+    <body>
+        <div class="reveal">
+            <div class="slides">
+
+                <!-- Slide "Zero" -->
+                <section id="presentation_title" title="presentation_title"> 
+                            <h2>Presentation with Interactions</h2>
+                </section>
+
+                <!-- Slide 1 -->
+                <section id="truefalse1" title="true_false_interaction">
+                    <h3>True/False Interaction</h3>
+                    <p data-definition>xAPI makes use of JSON (JavaScript Object Notation):</p>
+                    <!-- do not forget to add a title to the form... it will be used as part of the id for the statement! -->
+                    <form title="xapi_uses_json" data-crp="true">  <!-- crp is CorrectResponsePatterns as explained in the xAPI spec -->
+                        <div class="level">
+                            <label class="radio level-item">
+                              <input type="radio" name="option" value="true">True
+                            </label>
+                        </div>
+                        <div class="level">
+                            <label class="radio level-item">
+                              <input type="radio"  name="option" value="false">False
+                            </label>
+                        </div>
+                        <div class="level">
+                            <a class="button send-response is-primary level-item">Send Response</a>
+                        </div>
+                    </form>
+                </section>
+
+                <!-- Slide 2 -->
+                <section id="singlechoice1" title="single_choice_1">
+                    <h3>Single Choice Interaction</h3>
+                    <p data-definition>xAPI stands for:</p>
+                    <form title="xapi_stands_for" data-crp="ExperienceApplicationProgrammingInterface">
+                        <div class="level">
+                          <label class="level-item">
+                            <input type="radio" name="option" value="ExtraApplicationPosttestInteraction">
+                                Extra Application Posttest Interaction
+                          </label>
+                        </div>
+                        <div class="level">
+                          <label class="radio level-item">
+                            <input type="radio" name="option" value="ExperienceApplicationProgrammingInterface">
+                                  Experience Application Programming Interface
+                          </label>
+                        </div>
+                        <div class="level">
+                          <label class="radio level-item">
+                            <input type="radio" name="option" value="ExtensibleAdvancedProgramInstruction">
+                                  Extensible Advanced Program Instruction
+                          </label>
+                        </div>
+                      <div class="level">
+                        <a class="button send-response is-primary level-item">Send Response</a>
+                      </div>
+                    </form>
+                </section>
+
+                <!-- Slide 3 -->
+                <section id="multiplechoice1" title="multiple_choice_1">
+                    <h3>Multiple Choice Interaction</h3>
+                    <p data-definition>Select the items that are attributes of an xAPI statement:</p>
+                    <form title="select_attributes_of_xapi_statement" data-crp="context,authority">
+                        <div class="level">
+                            <label class="level-item">
+                              <input type="checkbox" name="option" value="scorm">
+                              SCORM
+                            </label>
+                        </div>
+                        <div class="level">
+                            <label class="level-item">
+                              <input type="checkbox" name="option" value="context">
+                                  context
+                            </label>
+                        </div>
+                        <div class="level">
+                            <label class="level-item">
+                              <input type="checkbox" name="option" value="authority">
+                                  authority
+                            </label>
+                        </div>
+                        <div class="level">
+                            <label class="level-item">
+                              <input type="checkbox" name="option" value="instructor">
+                                  instructor
+                            </label>
+                        </div>
+                        <div class="level">
+                            <a class="button send-response is-primary level-item sendint">Send Response</a>
+                        </div>
+                    </form>
+                </section>
+
+                <!-- Slide 4 -->
+                <section id="textinput1" title="text_input_1">
+                    <h3>Text Input Interaction</h3>
+                    <p data-description>Type the name of the attribute that allows to describe further details representing a measured outcome in an xAPI statement:</p>
+                    <form  title="name_outcome_attribute" data-crp="result">
+                        <div class="level">
+                              <input type="text" name="option" value="name_of_attribute">
+                        </div>
+
+                        <div class="level">
+                            <a class="button send-response is-primary level-item">Send Response</a>
+                        </div>
+                    </form>
+                </section>
+
+
+            </div>
+        </div>
+
+        <script src="lib/js/head.min.js"></script>
+        <script src="js/reveal.js"></script>
+
+        <script>
+            // More info about config & dependencies:
+            // - https://github.com/hakimel/reveal.js#configuration
+            // - https://github.com/hakimel/reveal.js#dependencies
+            Reveal.initialize({
+                dependencies: [
+                    { src: 'plugin/markdown/marked.js' },
+                    { src: 'plugin/markdown/markdown.js' },
+                    { src: 'plugin/notes/notes.js', async: true },
+                    { src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } }
+                ]
+            });
+        </script>
+    </body>
+</html>

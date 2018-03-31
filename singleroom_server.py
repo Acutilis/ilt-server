@@ -367,6 +367,10 @@ class ClientWSConnection(websocket.WebSocketHandler):
             self.write_message(msg)
             self._SC._xapi.sendstatement_sync_me_to_instructor(self)
 
+    def handle_interaction_response(self, msg_parts):
+        # HERE HERE implement this
+        pass
+
     def handle_finish_presentation(self, msg_parts):
         # ignore this command if coming from a non-instructor connection
         if not self._is_instructor:
