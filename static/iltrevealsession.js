@@ -154,8 +154,21 @@ var ILTRevealSession = window.ILTRevealSession || (function(){
         setup_interaction: function(current_slide) {
             this.current_form = $(current_slide).find('form')[0];
             if (! this.current_form) {
+                $('#force_i_submission').attr("disabled");
+                $('#see_interaction_results').attr("disabled");
                 return;
             }
+            // enable force_i_submission button, but only if nav is locked and 'follow me' is ON
+             var locknav_element = $('#lock_student_nav');
+             if (locknav_element) {  // if this element  exists, this is the instructor
+                var lockfollow_element = $('#lock_follow_instructor');
+                if (locknav_element.attr("checked") && lockfollow_element.attr("checked")) {
+                    $('#force_i_submission').removeAttr("disabled");
+                    $('#see_interaction_results').removeAttr("disabled");
+                }
+
+             }
+
             this.current_form_inputs = $($(current_slide).find('form')[0]).find('input')
             var button_send = $(this.current_form).find('a.send-response')[0];
             // enable all form elements and clear all responses
@@ -187,7 +200,6 @@ var ILTRevealSession = window.ILTRevealSession || (function(){
             $(button_send).off('click', this.send_response);  //disconnect the event handler
             $(button_send).attr("disabled", true);
         },
-
 
 
         // main dispatcher of messages received from the server
@@ -261,6 +273,9 @@ var ILTRevealSession = window.ILTRevealSession || (function(){
              ILTRevealSession.Reveal.configure({keyboard: !locked, controls: !locked})
          }, 
 
+         handle_do_submit_interaction: function(msg_parts) {
+             this.send_response();
+         },
 
         /* END handlers for messages coming from the server */
 
@@ -298,6 +313,27 @@ var ILTRevealSession = window.ILTRevealSession || (function(){
          sendreq_finish_presentation: function () {
              var msg = 'finish_presentation|';
              this.send_msg(msg);
+         },
+
+         sendreq_force_interaction_submission: function () {
+            // instructor-only function
+             var msg = 'force_interaction_submission|';
+             this.send_msg(msg);
+             // disable the button
+            $('#force_i_submission').prop("disabled", true);
+         },
+
+         sendreq_see_interaction_results: function () {
+             // instructor-only function
+             var msg = 'see_interaction_results|';
+             var confirm_str = "Do you really want to see and share the interaction results? Maybe you want to force submission first!";
+             if (!window.confirm(confirm_str)) {
+                 return;
+             }
+             this.send_msg(msg);
+             // disable the button
+            $('#see_interaction_results').prop("disabled", true);
+            $('#force_i_submission').prop("disabled", true);
          }
 
         /* END Functions to send requests to the server. */

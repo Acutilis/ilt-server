@@ -109,8 +109,6 @@ class SessionController(object):
             'statements': 0
         }
 
-
-
         self._xapi.sendstatement_session_started()
 
     def get_safe_nick(self, initial_nick):
@@ -213,6 +211,20 @@ class SessionController(object):
             if not conn._is_instructor:
                 conn.write_message(msg)
 
+    def broadcast_force_interaction_submission(self):
+        # loop through all connections, and if self._latest_interaction_info is None (that connection has
+        # not submitted the interaction, then send it the msg to force submission
+        msg = 'do_submit_interaction|'
+        for nick in self.clients:   # remember that the keys in self.clients are the nicks
+            conn = self.clients[nick]['connection']
+            if not conn._is_instructor:
+                if (not conn._latest_interaction_info):
+                    conn.write_message(msg)
+
+    def broadcast_interaction_result(self, tally_obj):
+        pass
+
+
     # monitor and stats methods
     # todo: the stats 'part' should know what has changed recently..?.
     def add_monitor(self, conn):
@@ -237,6 +249,63 @@ class SessionController(object):
     def set_stat(self, item_name, item_value):
         self.stats[item_name] = item_value
         self._update_monitors(item_name)
+
+    # interaction result tallying
+    def tally_interaction_results(self):
+        tally = {}
+        no_response = 0
+        total_correct = 0
+        total_incorrect = 0
+        for nick in self.clients:   # remember that the keys in self.clients are the nicks
+            total = 0
+            conn = self.clients[nick]['connection']
+            if not conn._is_instructor:
+                int_info = conn._latest_interaction_info
+                if (int_info):
+                    app_log.info('latest interaction info %s' % str(int_info))
+                    if tally == {}:
+                        # only initialize the tally obj the first time
+                        tally['q'] = int_info['description']
+                        tally['choices'] = {}
+                        if int_info['interaction_type'] == 'choice':
+                            for ch in int_info['choices']:
+                                tally['choices'][ch['id'].lower()] = { 'percent': 0, 'total': 0 }
+                                tally['choices'][ch['id'].lower()]['total'] = 0
+                        elif int_info['interaction_type'] == 'true-false':
+                            tally['choices'] = {'true': {'total':0, 'percent':0}, 'false': {'total':0, 'percent':0}}
+                            #tally['choices'][int_info['response']]['total'] += 1
+                        elif int_info['interaction_type'] == 'fill-in':
+                            nospace_response = int_info['response'].replace(' ','_') 
+                            tally['choices'][nospace_response] = { 'percent': 0, 'total': 0}
+                    # here, the tally obj is initialized
+                    if int_info['interaction_type'] != 'fill-in':
+                        for opt_chkd in int_info['options_checked']:
+                            tally['choices'][opt_chkd]['total'] += 1
+                    else: # fill-in
+                        nospace_response = int_info['response'].replace(' ','_')
+                        if not nospace_response in tally['choices']:
+                            tally['choices'][nospace_response] = { 'percent': 0, 'total': 0}
+                        tally['choices'][nospace_response]['total'] += 1
+                    total += 1
+                    if int_info['correct']:
+                        total_correct += 1
+                    else:
+                        total_incorrect += 1
+
+                else:
+                    no_response += 1
+
+        tally['no_response'] = {'total': no_response, 'percent':0}
+        tally['total_correct'] = total_correct
+        tally['total_incorrect'] = total_incorrect
+        app_log.info('TALLY: %s '% str(tally))
+
+        # example of interaction info object:
+        #{"interaction_type":"choice","id":"single_choice_1#xapi_stands_for","description":"xAPI stands for:","options_checked":["extraapplicationposttestinteraction"],
+        # "crp":"experienceapplicationprogramminginterface","response":"","correct":false,"choices":[{"id":"ExtraApplicationPosttestInteraction",
+        # "description":"ExtraApplicationPosttestInteraction"},{"id":"ExperienceApplicationProgrammingInterface","description":"ExperienceApplicationProgrammingInterface"},
+        # {"id":"ExtensibleAdvancedProgramInstruction","description":"ExtensibleAdvancedProgramInstruction"}]}
+
 
 
 class ClientWSConnection(websocket.WebSocketHandler):
@@ -378,10 +447,22 @@ class ClientWSConnection(websocket.WebSocketHandler):
         except:
             app_log.info("| ERROR: RECEIVED INTERACTION RESPONSE WITH BAD FORMAT")
             return
+        app_log.info('storing latest ineraction info ' , interaction_info)
         self._latest_interaction_info = interaction_info
         # generate and send the xapi statement
         self._SC._xapi.sendstatement_interaction_completed(self, interaction_info)
 
+    def handle_force_interaction_submission(self, msg_parts):
+        self._SC.broadcast_force_interaction_submission()
+
+    def handle_see_interaction_results(self, msg_parts):
+        # ignore this command if coming from a non-instructor connection
+        if not self._is_instructor:
+            return;
+        # when we get here, all participants have submitted or have been forced to submit their interaction results
+        # so we can just go ahead and tally the results
+        tally_obj = self._SC.tally_interaction_results()
+        #self._SC.broadcast_interaction_result(tally_obj)
 
     def handle_finish_presentation(self, msg_parts):
         # ignore this command if coming from a non-instructor connection

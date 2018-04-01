@@ -9,6 +9,8 @@
     <input id="lock_student_nav" type="checkbox" checked>Lock Student Navigation</input>
     <input id="lock_follow_instructor" type="checkbox" checked>Lock Follow Me</input>
     <button id="sync_to_me">Sync All with Me</button>
+    <button id="force_i_submission" disabled>Force Interaction Submission</button>
+    <button id="see_interaction_results" disabled>See Interaction Results</button>
     <button id="finish_presentation" disabled>Finish Presentation</button>
 </div>
 <script>
@@ -26,6 +28,12 @@ $('#lock_follow_instructor').on('click', function(ev) {
 });
 $('#sync_to_me').on('click', function(ev) {
     ILTRevealSession.sendreq_sync_to_instructor();
+});
+$('#force_i_submission').on('click', function(ev) {
+    ILTRevealSession.sendreq_force_interaction_submission();
+});
+$('#see_interaction_results').on('click', function(ev) {
+    ILTRevealSession.sendreq_see_interaction_results();
 });
 $('#finish_presentation').on('click', function(ev) {
     if (!window.confirm("Do you really want to finish the presentation?")) { 
