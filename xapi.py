@@ -396,6 +396,79 @@ class XAPI(object):
         )
         self._send_to_LRS(statement)
 
+    def _make_interaction_object(self, interaction_info):
+        # example of interaction info object:
+        #{"interaction_type":"choice","id":"single_choice_1#xapi_stands_for","description":"xAPI stands for:","options_checked":["extraapplicationposttestinteraction"],
+        # "crp":"experienceapplicationprogramminginterface","response":"","correct":false,"choices":[{"id":"ExtraApplicationPosttestInteraction",
+        # "description":"ExtraApplicationPosttestInteraction"},{"id":"ExperienceApplicationProgrammingInterface","description":"ExperienceApplicationProgrammingInterface"},
+        # {"id":"ExtensibleAdvancedProgramInstruction","description":"ExtensibleAdvancedProgramInstruction"}]}
+
+        interaction_id = self._presentation_activity_id + '/'  + interaction_info['id']
+        #crp = (interaction_info['crp']).replace(',','[,]')
+        crp = interaction_info['crp']
+        desc=LanguageMap({'en-US': interaction_info['description']})
+        if 'choices' in interaction_info:
+            # modify 'choices': it comes as a dict where both 'id' and 'description' are strings, but 'description' needs to be a LanguageMap in xAPI
+            for ch in interaction_info['choices']:
+                desc_str = ch['description']
+                desc_langmap = LanguageMap({'en-US': desc_str })
+                ch['description'] = desc_langmap
+
+        if (interaction_info['interaction_type'] == 'choice'):
+            choices = interaction_info['choices']
+            #app_log.info('choices = '+ str(choices))
+            activity_def=ActivityDefinition(
+                name=LanguageMap({'en-US': 'An interaction in a RevealJS slide'}),
+                description=desc,
+                type='http://adlnet.gov/expapi/activities/cmi.interaction',
+                interactionType=interaction_info['interaction_type'],
+                correctResponsesPattern=crp,
+                choices=choices
+            )
+        else:
+            activity_def=ActivityDefinition(
+                name=LanguageMap({'en-US': 'An interaction in a RevealJS slide'}),
+                description=desc,
+                type='http://adlnet.gov/expapi/activities/cmi.interaction',
+                interactionType=interaction_info['interaction_type'],
+                correctResponsesPattern=crp
+            )
+        object = Activity(
+            id=interaction_id,
+            definition=activity_def
+        )
+        return object
+
+    def sendstatement_interaction_completed(self, conn, interaction_info):
+        # HERE TO-DO: I want to change 'completion' ... if the submission was forced, say completion = NO
+        # although it's probably not nessary...
+        verb = Verb(
+            id='http://adlnet.gov/expapi/verbs/completed',
+            display=LanguageMap({'en-US': 'completed'}),
+        )
+        if (interaction_info['interaction_type'] == 'choice'):
+            result_obj = Result(
+                completion=interaction_info['interaction_type'],
+                response=','.join(interaction_info['options_checked']),
+                success=interaction_info['correct']
+            )
+        else:
+            result_obj = Result(
+                completion=interaction_info['interaction_type'],
+                response=interaction_info['response'],
+                success=interaction_info['correct']
+            )
+
+        statement = Statement(
+            actor=conn._actor,
+            verb=verb,
+            object=self._make_interaction_object(interaction_info),
+            result=result_obj
+        )
+        #app_log.info('SENDING INTERACTION Statement: '+ statement.actor.mbox + ' ' + statement.verb.id + ' ' + statement.object.id)
+        self._send_to_LRS(statement)
+
+
 
 #if __name__ == "__main__":
 #    xapi = XAPI()

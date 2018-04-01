@@ -64,50 +64,35 @@ var ILTRevealSession = window.ILTRevealSession || (function(){
             this.Reveal.addEventListener( 'slidechanged', this.on_slide_changed );
             this.handle_lock_student_nav(null, true); // trick to update the config of the Reveal presentation
             this.on_slide_changed(ev); // manually trigger a state update, so this connection sends its state to the server
-            //this.wireup_interaction_slides();
-        },
-
-        wireup_interaction_slides: function(ev) {
-            this.presentation_forms = $('.slides', this.pres_iframe.get(0).contentWindow.document).find('form');
-            var that = this;
-            $.each(this.presentation_forms, function(i, obj) {
-               var send_btn = $(obj).find('a.send-response').click(that.send_response);
-            });
         },
 
         send_response: function(ev) {
             this.disable_current_interaction();
-            // make an obj with names and responses/values of all the input elements, along with names/references that allow me to identify this interaction. 
-            // This is what will be sent through the wire 
-            //alert('Sending response...');
-            // I don't want to send only the 'checked' ... I want to send all, with the value if they're checked or not...
-            // also...  add the correct response pattern
-            // HERE HERE NEXT: build the response!
-            // { selected=['name1': true, 'name2': false] , correct_pattern=[false, true]
-            var resp_obj = this.build_response_obj()
-            this.send_msg('interaction_response|' + JSON.stringify(resp_obj));
+            var respinfo_obj = this.build_responseinfo_obj()
+            this.send_msg('interaction_info|' + JSON.stringify(respinfo_obj));
         },
 
-        build_response_obj: function() {
-            var obj = { interaction_type:'',  id:null, definition:'', options_checked: [], crp: null, response:'', correct:false }
+        build_responseinfo_obj: function() {
+            var obj = { interaction_type:'',  id:null, description:'', options_checked: [], crp: null, response:'', correct:false }
             var sld = this.Reveal.getCurrentSlide(); //this is the 'section' corresponding to this slide
             var slide_title= $(sld).prop('title');
             var form_title= $(this.current_form).prop('title');
             obj.id= slide_title + '#' + form_title;
             if (obj.id=="#") obj.id = "radom_id_" + Math.floor(Math.random() * 1000000).toString();
             var defi = ''
-            $(sld).find("[data-definition]").each(function() {
+            $(sld).find("[data-description]").each(function() {
                 defi = defi + $(this).text();
             });
-            obj.definition = defi;
-            obj.crp = $(this.current_form).attr('data-crp').toLowerCase();
-
+            obj.description = defi;
+            obj.crp = ($(this.current_form).attr('data-crp').toLowerCase()).split(',');
+            var choices = [];
             $(this.current_form_inputs).each(function() {
                 var inp = $(this)[0];
                 var inptype = [$(inp).is('[type="checkbox"]'), $(inp).is('[type="radio"]'), $(inp).is('[type="text"]')]
                 if (inptype[0] || inptype[1]) {  //it's a checkbox or a radio button
                     var v = $(inp).prop("value");
                     (v == "true" || v == "false") ? obj.interaction_type = "true-false" : obj.interaction_type = "choice";
+                    choices.push({id: v, description: v});
                     if ($(inp).prop("checked")) {
                         obj['options_checked'].push($(inp).prop("value").toLowerCase());
                     }
@@ -120,15 +105,19 @@ var ILTRevealSession = window.ILTRevealSession || (function(){
                     return null;
                 }
             });
-            // calculate correctness. For fill-in we already have it.
+            // Add choices, if necessary. Calculate correctness. For fill-in we already have it. 
             if (obj.interaction_type == "true-false") {
-                obj.correct= (obj.crp == obj.options_checked[0]);
+                obj.correct= (obj.crp[0] == obj.options_checked[0]);
+                obj.response = obj.options_checked.join(',');
             } else if (obj.interaction_type == "choice") {
-                // correct if all checked options are in the CorrectResponsePattern
+                // correct if all checked options are in the CorrectResponsePatterna
+                obj.response = obj.options_checked.join(',');
+                obj['choices'] = choices;
                 if  (obj.options_checked.length>0) {
+                    str_crp = obj.crp.join(',');
                     var is_correct = true;
                     for (var i=0; i<obj.options_checked.length; i++) {
-                        is_correct = (is_correct && (obj.crp.indexOf(obj.options_checked[i]) > -1));
+                        is_correct = (is_correct && (str_crp.indexOf(obj.options_checked[i]) > -1));
                     }
                     obj.correct = is_correct;
                 } 
@@ -164,6 +153,9 @@ var ILTRevealSession = window.ILTRevealSession || (function(){
 
         setup_interaction: function(current_slide) {
             this.current_form = $(current_slide).find('form')[0];
+            if (! this.current_form) {
+                return;
+            }
             this.current_form_inputs = $($(current_slide).find('form')[0]).find('input')
             var button_send = $(this.current_form).find('a.send-response')[0];
             // enable all form elements and clear all responses

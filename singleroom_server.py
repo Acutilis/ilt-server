@@ -248,6 +248,7 @@ class ClientWSConnection(websocket.WebSocketHandler):
         self._is_instructor = False
         self._actor = None
         self._current_slide_arrival_time = None
+        self._latest_interaction_info = None
 
     def open(self):
         initial_nick = self.get_argument("nick")
@@ -315,7 +316,8 @@ class ClientWSConnection(websocket.WebSocketHandler):
 
     def handle_slide_changed(self, msg_parts):
         # generate and send xapi statement, no matter who sends this message. For this we will have to json.loads(msg_body) to get some parameters.
-        # send xapi!!  WHEN FOLLOW MODE IS ON, should I send xapi statements for all?? OR WILL BE VERY MUCH POLLUTING?
+        # clean up interaction info for this slide
+        self._latest_interaction_info = None
         state_txt = msg_parts[1]
         slideinfo_txt = msg_parts[2]   # info about previous and current slides
         slideinfo_obj = json.loads(slideinfo_txt)
@@ -367,9 +369,19 @@ class ClientWSConnection(websocket.WebSocketHandler):
             self.write_message(msg)
             self._SC._xapi.sendstatement_sync_me_to_instructor(self)
 
-    def handle_interaction_response(self, msg_parts):
-        # HERE HERE implement this
-        pass
+    def handle_interaction_info(self, msg_parts):
+        if self._is_instructor:
+            # We are ignoring the instructor's responses to interactions
+            return
+        try:
+            interaction_info = json.loads(msg_parts[1])
+        except:
+            app_log.info("| ERROR: RECEIVED INTERACTION RESPONSE WITH BAD FORMAT")
+            return
+        self._latest_interaction_info = interaction_info
+        # generate and send the xapi statement
+        self._SC._xapi.sendstatement_interaction_completed(self, interaction_info)
+
 
     def handle_finish_presentation(self, msg_parts):
         # ignore this command if coming from a non-instructor connection
