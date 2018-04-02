@@ -32,12 +32,20 @@ By default the server will be run on `localhost`, port 8888.
 
 To test, open up at least two browser windows, and go to `localhost:8888`. Enter a nickname to 'join the session'. The first user to join will be given the role of instructor.
 
+## Interactions
+(TBW)
+
 ## xAPI
 
 The `lrs_config.json` file contains information for the LRSs. Please note that it's an array. It has only one object (one LRS). You can put more objects in the array, but they will be ignored (the idea was to implement multiple LRS functionality but, probably we won't do it for now).
 The config object for an LRS admits the attribute `active`, which can be set to `true` or `false`. When it is `false`, the statements will not be sent to the LRS. Useful during development.
 
+TO-DO: Add note about buffering.
+
 ### Statements
+
+TO-DO: Add info about the statements sent with the interactions, and when the instructor shares the intearction statistics.
+
 Here are the statements, expressed in plain language, that the system sends:
 
 Note: 'participant' means any participant, instructor or student. 'sysadmin' is a 'virtual/unknown user', in a way; it's just whoever starts and stops the server app.
