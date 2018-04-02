@@ -1,0 +1,12 @@
+<div id="control_panel" class="participant">
+    <button class="button is-primary" id="sync_to_instructor" {% if navigation_locked %}disabled{% end %}>Sync to Instructor</button> 
+    <!-- <button class="button is-primary" id="sync_to_instructor" disabled>Sync to Instructor</button>  -->
+</div>
+
+<script>
+
+$('#sync_to_instructor').on('click', function(ev) {
+    ILTRevealSession.sendreq_sync_to_instructor();
+});
+</script>
+

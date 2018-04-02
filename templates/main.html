@@ -5,22 +5,36 @@
     <script src="/static/zepto.min.js"></script>
     <script src="/static/underscore-min.js"></script>
     <script src="/static/iltrevealsession.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.6.2/css/bulma.min.css" rel="stylesheet" type="text/css">
+    <link href="/static/bulma.min.css" rel="stylesheet" type="text/css" > 
+    <link href="/static/bulma-switch.min.css" rel="stylesheet" type="text/css" >
+    <link href="/static/bulma-radio-checkbox.min.css" rel="stylesheet" type="text/css" >
     <link href="/static/style.css" rel="stylesheet" type="text/css" >
+    <script  src="https://use.fontawesome.com/releases/v5.0.6/js/all.js"></script>
 </head>
 <body>
 
     <div id="control_panel"></div>
-    <div id="main_content">
-        <h1>ILT Presentation System</h1>
-        <h2>Join Presentation</h2>
-        <p>To join the presentation you need to choose a nickname.</p>
 
-        <div id="nickbox">
-            <p>Your preferred nickname: <input id="txtNickname" type="text" name="Nickname" value=""></p>
-            <p><input id="btnJoin" type="button" name="Send" value="Join!" disabled="disabled"/></p>
+    <div id="main_content">
+        <section class="columns">
+      <div class="column is-half is-offset-one-quarter">
+        <h1 class="title">ILT Presentation System</h1>
+
+        <h2>Join Presentation</h2>
+        <p>To join the session you need to choose a nickname.</p>
+        <div class="field">
+              <label class="label">Your preferred nickname:</label>
+                <div class="control">
+                  <input id="txtNickname" class="input" type="text" placeholder="nickname">
+                </div>
+           <button id="btnJoin" class="button is-primary"  type="button" name="Send" value="Join!" disabled="disabled"/>Join!</button>
         </div>
+      </div>        
+
+        </section>
+
     </div>
+
     <div id="modal_container">
     </div>
 

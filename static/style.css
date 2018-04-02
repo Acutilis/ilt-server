@@ -1,12 +1,6 @@
 
 #control_panel {
-    margin: 0px;
-    padding: 0px;
-    /*
-    position: fixed;
-    top: 0px;
-    */
-    background-color: #eaffe2;
+    background-color: #fcfffa;
     margin-left: auto;
     margin-right: auto;
     padding: 0px;
@@ -17,7 +11,6 @@
 }
 
 #main_content {
-    background-color: #b6b6b6;
     height: 800px;
 }
 
@@ -26,33 +19,3 @@
     height: 100%;
 }
 
-.waiting_msg {
-    padding-top: 300px;
-    text-align: center;
-}
-
-#chat {
-    float: left;
-
-}
-
-.hidden {
-    visibility: hidden;
-}
-
-#msgList {
-    border-width: 1px;
-    border: solid;
-    height:200px;
-    width:300px;
-    overflow:scroll;
-}
-
-#msgList ul li {
-    list-style-type: none;
-    margin-left: -32px;
-}
-
-#nickList {
-    float:left;
-}

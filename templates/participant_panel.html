@@ -1,7 +1,14 @@
-<div id="control_panel" class="participant">
-    <h4>Participant Control Panel</h4>
-    <input id="navigation_locked" type="checkbox" disabled="disabled" {% if navigation_locked %}checked{% end %}>Navigation Locked</input>
-    <button id="sync_to_instructor" {% if navigation_locked %}disabled{% end %}>Sync to Instructor</button>
+<div id="control_panel" class="participant columns">
+
+ <div class="column is-3">
+  <div class="b-checkbox is-warning is-circular">
+    <input id="navigation_locked" class="styled" type="checkbox" disabled="disabled" {% if navigation_locked %}checked{% end %}>
+        <label for="navigation_locked">Navigation Locked</label>
+  </div>
+  </div>
+ <div class="column is-1">
+  <button id="sync_to_instructor" class="button is-primary" {% if navigation_locked %}disabled{% end %}>Sync to Instructor</button>
+  </div>
 </div>
 <script>
 $('#sync_to_instructor').on('click', function(ev) {
