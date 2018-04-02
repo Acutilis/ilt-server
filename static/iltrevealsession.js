@@ -1,7 +1,7 @@
 var ILTRevealSession = window.ILTRevealSession || (function(){
 
     return ( {
-
+        i_am_instructor: false,
         pres_iframe: null,
         Reveal: null,
         slide_info: { previous_slide: {title: null, indexh: null, indexv: null}, current_slide: {title: null, indexh: null, indexv: null} },
@@ -160,7 +160,8 @@ var ILTRevealSession = window.ILTRevealSession || (function(){
             }
             // enable force_i_submission button, but only if nav is locked and 'follow me' is ON
              var locknav_element = $('#lock_student_nav');
-             if (locknav_element) {  // if this element  exists, this is the instructor
+             if (locknav_element.length==1) {  // if this element  exists, this is the instructor
+                this.i_am_instructor = true;
                 var lockfollow_element = $('#lock_follow_instructor');
                 if (locknav_element.attr("checked") && lockfollow_element.attr("checked")) {
                     $('#force_i_submission').removeAttr("disabled");
@@ -213,6 +214,15 @@ var ILTRevealSession = window.ILTRevealSession || (function(){
             }
          },
 
+        kill_modal: function() {
+            $('#modal_container').removeClass('is-active');
+            $('#modal_container').html('');
+            var locknav_element = $('#lock_student_nav');
+            if (locknav_element.length == 1) {  // if this element  exists, this is the instructor
+                console.log('SENDING REQUEST TO KILL MODAL');
+                this.sendreq_kill_modal();
+            }
+        },
 
         /* Handlers for messages coming from the server. They all start with 'handle_' */
  
@@ -277,6 +287,14 @@ var ILTRevealSession = window.ILTRevealSession || (function(){
              this.send_response();
          },
 
+        handle_tally: function(msg_parts) {
+            //alert('handling tally!!');
+           $('#modal_container').html(msg_parts[1]);
+        },
+
+        handle_kill_modal: function(msg_parts) {
+            this.kill_modal();
+        },
         /* END handlers for messages coming from the server */
 
 
@@ -334,7 +352,14 @@ var ILTRevealSession = window.ILTRevealSession || (function(){
              // disable the button
             $('#see_interaction_results').prop("disabled", true);
             $('#force_i_submission').prop("disabled", true);
-         }
+         },
+
+         sendreq_kill_modal: function () {
+            // instructor-only function
+             var msg = 'kill_modal|';
+             this.send_msg(msg);
+         },
+
 
         /* END Functions to send requests to the server. */
 

@@ -468,6 +468,37 @@ class XAPI(object):
         #app_log.info('SENDING INTERACTION Statement: '+ statement.actor.mbox + ' ' + statement.verb.id + ' ' + statement.object.id)
         self._send_to_LRS(statement)
 
+    def sendstatement_tally_shared(self, conn, tally_obj):
+        # self._SC._active_presentation_name   and tally_obj['id'] give me the id.
+        # self._presentation_activity_id = 'https://iltserver.com/presentations/' + presentation_slug
+        tally_activity_id = 'https://iltserver.com/presentations/' + self._SC._active_presentation_name + '/interaction_stats/' + tally_obj['id']
+
+        verb = Verb(
+            id='http://adlnet.gov/expapi/verbs/shared',
+            display=LanguageMap({'en-US': 'shared'}),
+        )
+
+        obj = Activity(
+            id=tally_activity_id,
+            definition=ActivityDefinition(
+                name=LanguageMap({'en-US': 'Interaction statistics'}),
+                description=LanguageMap({'en-US': 'Statistics about the responses to an interaction in the Reveal JS presentation.'}),
+                type='https://xapi.xapicohort.org/iltxapiteam/activity-types/interaction-stats'
+            ),
+        )
+        result_obj = Result(
+            extensions=Extensions({
+                'https://iltserver.com/extensions/interaction-response-info': tally_obj
+            })
+        )
+        statement = Statement(
+            actor=conn._actor,
+            verb=verb,
+            object=obj,
+            result=result_obj
+        )
+        self._send_to_LRS(statement)
+
 
 
 #if __name__ == "__main__":

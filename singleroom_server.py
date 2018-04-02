@@ -222,7 +222,19 @@ class SessionController(object):
                     conn.write_message(msg)
 
     def broadcast_interaction_result(self, tally_obj):
-        pass
+        #msg = 'tally|' + json.dumps(tally_obj)
+        tally_modal_content = render_file("tally_modal.html", { 'tally': tally_obj })
+        for nick in self.clients:   # remember that the keys in self.clients are the nicks
+            conn = self.clients[nick]['connection']
+            conn.write_message('tally|' + tally_modal_content)
+
+    def broadcast_kill_modal(self):
+        msg = 'kill_modal|'
+        for nick in self.clients:   # remember that the keys in self.clients are the nicks
+            conn = self.clients[nick]['connection']
+            if not conn._is_instructor:
+                conn.write_message(msg)
+
 
 
     # monitor and stats methods
@@ -253,6 +265,7 @@ class SessionController(object):
     # interaction result tallying
     def tally_interaction_results(self):
         tally = {}
+        total_conns = 0
         no_response = 0
         total_correct = 0
         total_incorrect = 0
@@ -262,10 +275,11 @@ class SessionController(object):
             if not conn._is_instructor:
                 int_info = conn._latest_interaction_info
                 if (int_info):
-                    app_log.info('latest interaction info %s' % str(int_info))
+                    #app_log.info('latest interaction info %s' % str(int_info))
                     if tally == {}:
                         # only initialize the tally obj the first time
                         tally['q'] = int_info['description']
+                        tally['id'] =  int_info['id']
                         tally['choices'] = {}
                         if int_info['interaction_type'] == 'choice':
                             for ch in int_info['choices']:
@@ -294,11 +308,19 @@ class SessionController(object):
 
                 else:
                     no_response += 1
+                total_conns += 1
 
-        tally['no_response'] = {'total': no_response, 'percent':0}
-        tally['total_correct'] = total_correct
-        tally['total_incorrect'] = total_incorrect
-        app_log.info('TALLY: %s '% str(tally))
+        # calculate percentages!
+        tally['total_students'] = total_conns
+        tally['total_responses'] = total_conns - no_response
+        tally['no_response'] = {'total': no_response, 'percent': format( (no_response*1.0/total_conns)*100, '.2f') }
+        tally['correct'] = {'total': total_correct, 'percent': format( (total_correct*1.0/total_conns)*100, '.2f')}
+        tally['incorrect'] = {'total': total_incorrect, 'percent': format( (total_incorrect*1.0/total_conns)*100, '.2f')}
+        for ch in tally['choices']:
+            tally['choices'][ch]['percent'] = format( (tally['choices'][ch]['total']*1.0/total_conns)*100, '.2f')
+
+        #app_log.info('TALLY: %s '% str(tally))
+        return tally
 
         # example of interaction info object:
         #{"interaction_type":"choice","id":"single_choice_1#xapi_stands_for","description":"xAPI stands for:","options_checked":["extraapplicationposttestinteraction"],
@@ -462,7 +484,9 @@ class ClientWSConnection(websocket.WebSocketHandler):
         # when we get here, all participants have submitted or have been forced to submit their interaction results
         # so we can just go ahead and tally the results
         tally_obj = self._SC.tally_interaction_results()
-        #self._SC.broadcast_interaction_result(tally_obj)
+        self._SC.broadcast_interaction_result(tally_obj)
+        # send statement about instructor sharing the tally ??
+        self._SC._xapi.sendstatement_tally_shared(self, tally_obj )
 
     def handle_finish_presentation(self, msg_parts):
         # ignore this command if coming from a non-instructor connection
@@ -470,6 +494,12 @@ class ClientWSConnection(websocket.WebSocketHandler):
             return;
         self._SC.broadcast_finish_presentation()
         self._SC._xapi.sendstatement_presentation_unloaded(self)
+
+    def handle_kill_modal(self, msg_parts):
+        # ignore this command if coming from a non-instructor connection
+        if not self._is_instructor:
+            return;
+        self._SC.broadcast_kill_modal()
 
 
 if __name__ == "__main__":

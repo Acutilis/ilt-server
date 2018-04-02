@@ -1,0 +1,49 @@
+<div class="modal is-active">
+  <div class="modal-background"></div>
+  <div class="modal-card">
+    <header class="modal-card-head">
+      <p class="modal-card-title">Interaction Results</p>
+      <button id="modal-close" class="delete" aria-label="close"></button>
+    </header>
+    <section class="modal-card-body">
+        <section class="section">
+            <h1>Question</h1>
+            <p>{{ tally['q'] }}</p>
+        </section>
+        <section class="section">
+        <div class="level">
+            <div class="level-item">
+                <strong>Total Students: </strong>{{ tally['total_students'] }}
+            </div>
+            <div class="level-item">
+                <strong>Total Responses: </strong>{{ tally['total_responses'] }}
+            </div>
+        </div>
+        <div class="level">
+            <div class="level-item">
+                <strong>Correct: </strong>{{ tally['correct']['percent'] }}% ({{ tally['correct']['total'] }})
+            </div>
+            <div class="level-item">
+                <strong>Incorrect: </strong>{{ tally['incorrect']['percent'] }}% ({{ tally['incorrect']['total'] }})
+
+            </div>
+            <div class="level-item">
+                <strong>No response: </strong>{{ tally['no_response']['percent'] }}% ({{ tally['no_response']['total'] }})
+
+            </div>
+        </div>
+        </section>
+        <section class="section">
+            <h1>Answers/choices</h1>
+            {% for ch in tally['choices'] %}
+            <div><strong>{{ ch }}</strong>: {{ tally['choices'][ch]['percent'] }}% ({{ tally['choices'][ch]['total'] }})</div>
+            {% end %}
+        <section>
+    </section>
+  </div>
+</div>
+<script>
+$('#modal-close').on('click', function(ev) {
+    ILTRevealSession.kill_modal();
+});
+</script>
